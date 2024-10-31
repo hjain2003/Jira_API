@@ -1,0 +1,30 @@
+
+#company{
+    font-size: 50px;
+    color: aqua;
+}
+
+nav{
+    height: 40px;
+    background-color: rgb(10, 12, 18);
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    color: white;
+    padding: 20px;
+    align-items: center;
+}
+#rightspan{
+    margin-left: 900px;
+    display: flex;
+    align-items: center;
+}
+#rightspan button{
+    border: none;
+    background-color: rgb(96, 247, 211);
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 17px;
+}
