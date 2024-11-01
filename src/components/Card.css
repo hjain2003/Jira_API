@@ -1,0 +1,36 @@
+.card_box{
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    /* padding: 10px; */
+    height: 230px;
+    border: 2px solid white;
+    color: wheat;
+}
+
+.card_box_top_row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.left_side_wrapper{
+    display: flex;
+    flex-direction: row;
+}
+
+#id,#issue_type,#priority{
+    border: 1px solid white;
+    padding: 5px;
+}
+.other_info{
+    margin-left: 20px;
+}
+
+#change_status{
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    width: 250px;
+    margin-left: 20px;
+}
