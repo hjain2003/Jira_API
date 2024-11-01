@@ -133,7 +133,7 @@ const Dashboard = () => {
           {selectedButton === "button1" && (
             <>
               {getPaginatedIssues(assignedIssues, assignedPage).map((issue) => (
-                <Card key={issue.id} id={issue.id} issue={issue} />
+                <Card key={issue.id} id={issue.id} issue={issue} assignee={issue.fields.assignee.displayName} showCreator={true} showAssignee={false} />
               ))}
               {assignedIssues.length > ITEMS_PER_PAGE && (
                 <div>
@@ -152,7 +152,7 @@ const Dashboard = () => {
           {selectedButton === "button2" && (
             <>
               {getPaginatedIssues(createdIssues, createdPage).map((issue) => (
-                <Card key={issue.id} id={issue.id} issue={issue} />
+                <Card key={issue.id} id={issue.id} issue={issue} assignee={issue.fields.assignee ? issue.fields.assignee.displayName : "Unassigned"} showCreator={false} showAssignee={true}/>
               ))}
               {createdIssues.length > ITEMS_PER_PAGE && (
                 <div>
