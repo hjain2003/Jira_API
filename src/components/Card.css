@@ -3,9 +3,42 @@
     flex-direction: column;
     width: 300px;
     /* padding: 10px; */
-    height: 230px;
-    border: 2px solid white;
-    color: wheat;
+    height: 400px;
+    border: 2px solid rgb(96, 247, 211);
+    color: white;
+    margin-right: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.card_box:before {
+    content: '';
+    position: absolute;
+    bottom: -20px; /* Adjust for desired cut depth */
+    left: -20px; /* Adjust for desired cut width */
+    width: 40px; /* Size of the cut */
+    height: 40px; /* Size of the cut */
+    background: rgb(96, 247, 211); /* Background color of the cut */
+    transform: rotate(45deg); /* Rotate to create a diagonal effect */
+    z-index: 1; /* Ensure it appears behind content */
+}
+.card_box:after {
+    content: '';
+    position: absolute;
+    bottom: 0; /* Align with the bottom */
+    left: 0; /* Align with the left */
+    width: 100%; /* Extend across full width */
+    height: 2px; /* Line thickness */
+    background: rgb(96, 247, 211); /* Border color */
+}
+
+.card_box > * {
+    position: relative; /* Position elements above the border */
+    z-index: 2; /* Ensure content appears above the pseudo-elements */
+}
+
+.card_box:hover{
+    transform: scale(1.1);
 }
 
 .card_box_top_row{
@@ -25,12 +58,20 @@
 }
 .other_info{
     margin-left: 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
 }
-
+.other_info b{
+    margin-top: 10px;
+    color: rgb(96, 247, 211);
+}
 #change_status{
     border: none;
     padding: 6px;
     cursor: pointer;
     width: 250px;
     margin-left: 20px;
+    background-color: rgb(96, 247, 211);
+   
 }

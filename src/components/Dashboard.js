@@ -4,122 +4,170 @@ import { googleLogout } from "@react-oauth/google";
 import "./Dashboard.css";
 import Card from "./Card";
 
+const ITEMS_PER_PAGE = 5;
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [emailFrmJira, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [issues, setIssues] = useState([]);
-  const [error, setError] = useState(null); 
+  const [assignedIssues, setAssignedIssues] = useState([]);
+  const [createdIssues, setCreatedIssues] = useState([]);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [assignedPage, setAssignedPage] = useState(1);
+  const [createdPage, setCreatedPage] = useState(1);
+  const [selectedButton, setSelectedButton] = useState(null);
 
-  // console.log(issues);
-  
   const onLogoutSuccess = () => {
     localStorage.clear();
-    googleLogout(); // Call the googleLogout function
-    console.log("Logged out successfully");
+    googleLogout();
     navigate("/");
   };
 
   useEffect(() => {
-    // Retrieve and set email and name once on component mount
     const storedName = localStorage.getItem("displayName");
     const emailjira = localStorage.getItem("email");
-    if (storedName) {
-        setName(storedName);
-    }
-    if (emailjira) {
-        setEmail(emailjira);
-    }
-}, []);
+    if (storedName) setName(storedName);
+    if (emailjira) setEmail(emailjira);
 
-useEffect(() => {
-    const tokenid = localStorage.getItem('tokenid');
-    const emailjiraa = localStorage.getItem("email");
+    const fetchIssues = async () => {
+      const tokenid = localStorage.getItem("tokenid");
+      try {
+        const assignedResponse = await fetch(
+          `http://localhost:5000/api/issues/assigned?email=${emailjira}&token=${tokenid}`
+        );
+        if (assignedResponse.ok) {
+          const data = await assignedResponse.json();
+          setAssignedIssues(data.issues);
+        } else {
+          setError("Failed to fetch assigned issues");
+        }
 
-    // Proceed only if both tokenid and email are available
-    if (tokenid && emailjiraa) {
-        const fetchIssues = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/api/issues?email=${emailjiraa}&token=${tokenid}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setIssues(data.issues); // Adjust based on actual API response structure
-                    console.log(data);
-                } else {
-                    setError('Failed to fetch issues');
-                }
-            } catch (err) {
-                console.error('Error fetching issues:', err);
-                setError('Server error');
-            } finally {
-                setLoading(false);
-            }
-        };
+        const createdResponse = await fetch(
+          `http://localhost:5000/api/issues/created?email=${emailjira}&token=${tokenid}`
+        );
+        if (createdResponse.ok) {
+          const data = await createdResponse.json();
+          setCreatedIssues(data.issues);
+        } else {
+          setError("Failed to fetch created issues");
+        }
+      } catch (err) {
+        setError("Server error");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchIssues();
-    }
-}, [emailFrmJira]); // Run only when emailFrmJira is set
-
-  const [selectedButton, setSelectedButton] = useState(null);
+    fetchIssues();
+  }, []);
 
   const handleButtonClick = (button) => {
-    // Toggle selection: deselect if the button is already selected, otherwise select it
     setSelectedButton((prevButton) => (prevButton === button ? null : button));
+  };
+
+  const nextPage = (type) => {
+    if (type === "assigned" && assignedPage * ITEMS_PER_PAGE < assignedIssues.length) {
+      setAssignedPage(assignedPage + 1);
+    } else if (type === "created" && createdPage * ITEMS_PER_PAGE < createdIssues.length) {
+      setCreatedPage(createdPage + 1);
+    }
+  };
+
+  const prevPage = (type) => {
+    if (type === "assigned" && assignedPage > 1) {
+      setAssignedPage(assignedPage - 1);
+    } else if (type === "created" && createdPage > 1) {
+      setCreatedPage(createdPage - 1);
+    }
+  };
+
+  const getPaginatedIssues = (issues, page) => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return issues.slice(start, end);
   };
 
   return (
     <>
-    <div>
-      <nav>
-        <span>
-          <h1>DigitalXForce Ticket Raising Platform</h1>
-        </span>
-        <div id="rightspan">
-          {emailFrmJira} &nbsp;&nbsp;&nbsp;
-          <button onClick={onLogoutSuccess}>Logout</button>
+      <div>
+        <nav>
+          <span>
+            <h1>DigitalXForce Ticket Raising Platform</h1>
+          </span>
+          <div id="rightspan">
+            {emailFrmJira} &nbsp;&nbsp;&nbsp;
+            <button onClick={onLogoutSuccess}>Logout</button>
+          </div>
+        </nav>
+
+        <div className="greeting">
+          <h2>Hello, {name}</h2>
         </div>
-      </nav>
+        <br />
 
-      <div className="greeting">
-        <h2>Hello, {name}</h2>
+        <input type="text" id="search_issue" placeholder="Search an issue" /> &nbsp;&nbsp;&nbsp;
+        <button id="open_ticket">Open a ticket</button>
+        <br /><br />
+
+        <div id="multiple_btns">
+          <button
+            className={`active_btns ${selectedButton === "button1" ? "selected" : ""}`}
+            onClick={() => handleButtonClick("button1")}
+          >
+            <b>Assigned to You</b> ({assignedIssues.length})
+          </button>
+          &nbsp;&nbsp;&nbsp;
+          <button
+            className={`active_btns ${selectedButton === "button2" ? "selected" : ""}`}
+            onClick={() => handleButtonClick("button2")}
+          >
+            <b>Created by You </b>({createdIssues.length})
+          </button>
+        </div>
+
+        <div className="cards_holder">
+          {loading && <p>Loading issues...</p>}
+          {error && <p>{error}</p>}
+
+          {selectedButton === "button1" && (
+            <>
+              {getPaginatedIssues(assignedIssues, assignedPage).map((issue) => (
+                <Card key={issue.id} id={issue.id} issue={issue} />
+              ))}
+              {assignedIssues.length > ITEMS_PER_PAGE && (
+                <div>
+                  <button className="pagination_btns" onClick={() => prevPage("assigned")} disabled={assignedPage === 1}>
+                    Previous
+                  </button>
+                  <br/>
+                  <button className="pagination_btns" onClick={() => nextPage("assigned")} disabled={assignedPage * ITEMS_PER_PAGE >= assignedIssues.length}>
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {selectedButton === "button2" && (
+            <>
+              {getPaginatedIssues(createdIssues, createdPage).map((issue) => (
+                <Card key={issue.id} id={issue.id} issue={issue} />
+              ))}
+              {createdIssues.length > ITEMS_PER_PAGE && (
+                <div>
+                  <button className="pagination_btns" onClick={() => prevPage("created")} disabled={createdPage === 1}>
+                    Prev
+                  </button><br/><br/>
+                  <button className="pagination_btns" onClick={() => nextPage("created")} disabled={createdPage * ITEMS_PER_PAGE >= createdIssues.length}>
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-      <br />
-
-      <input type="text" id="search_issue" placeholder="Search an issue" /> &nbsp;&nbsp;&nbsp;{" "}
-      <button id="open_ticket">Open a ticket</button>
-      <br /><br />
-
-      <div id="multiple_btns">
-        <button
-          className={`active_btns ${selectedButton === "button1" ? "selected" : ""}`}
-          onClick={() => handleButtonClick("button1")}
-        >
-          Assigned to You
-        </button>
-        &nbsp;&nbsp;&nbsp;
-        {/* Button 2 */}
-        <button
-          className={`active_btns ${selectedButton === "button2" ? "selected" : ""}`}
-          onClick={() => handleButtonClick("button2")}
-        >
-          Created by You
-        </button>
-      </div>
-
-
-      <div className="cards_holder">
-                {loading && <p>Loading issues...</p>}
-                {error && <p>{error}</p>}
-                {selectedButton === "button1" && issues.length > 0 && issues.map(issue => (
-                    <Card key={issue.id} issue={issue} />
-                ))}
-                {selectedButton === "button1" && issues.length === 0 && <p>No issues assigned to you.</p>}
-                {selectedButton === "button2" && <p>Created by me section</p>}
-            </div>
-
-    </div>
-    
     </>
   );
 };
