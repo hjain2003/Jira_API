@@ -3,7 +3,7 @@
     flex-direction: column;
     width: 300px;
     /* padding: 10px; */
-    height: 400px;
+    height: 370px;
     border: 2px solid rgb(96, 247, 211);
     color: white;
     margin-right: 20px;
@@ -114,4 +114,20 @@
     padding: 10px;
     border: none;
     border-radius: 10px;
+}
+
+#update_box{
+    height: 300px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top:50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: rgb(219, 216, 216);
+    z-index: 1000;
+    border-radius: 20px;
+    color: black;
+    padding: 20px;
 }
